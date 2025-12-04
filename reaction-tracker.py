@@ -10,14 +10,14 @@ import csv  # გვაძლევს csv ფაილების დაწე
 def run_trial(trial_number):
     """თითო რეაქციის დროს ცდის გაშვება და შედეგის დაბრუნება"""
 
-    print(f"\n trial {trial_number}:")
+    print(f"\n Trial {trial_number}:")
 
     # ვაჩერებთ პროგრამას და ველოდებით თუ როდის დააჭერს მომხმარებელი ENTERS-ს
     input("Press ENTER when you are ready...")
 
     print("Get Ready!!!")
 
-    # დაყოვნება უნდა იყოს არაპროგნოზიორებადი, რათა მომხვარებელმა ვერ მოატყუოს
+    # დაყოვნება უნდა იყოს არაპროგნოზიორებადი, რათა მომხმარებელმა ვერ მოატყუოს
     delay = random.uniform(0.7, 5.0)
 
     # პროგრამა შეჩერდება ზემოთ მოცემული დროის განმავლობაში
@@ -40,6 +40,7 @@ def run_trial(trial_number):
         return None
     elif reaction_time > 10.0:
         print("Too Slow!")
+        return None
 
     #:.4f - ვაჩვენებთ რეაქციის დროს 4 ათობითი ნიშნით
     print(f"Your Reaction Time: {reaction_time:.4f} seconds")
@@ -55,19 +56,17 @@ def run_trial(trial_number):
 
 def save_results(times, filename="reaction_times.csv"):
     """ყველა რეაქციის დრო შეინახება CSV ფაილში"""
-    # open() ხსნის ან ქმინს ფაილს
-    # "w" ქმინს ახალ ფაილს ან გადაწერს არსებულს
+    # open() ხსნის ან ქმნის ფაილს
+    # "w" ქმნის ახალ ფაილს ან გადაწერს არსებულს
     # newline="" ხელს შეუშლის დამატებით ცარიელ სტრიქონებს
     # "with" ფაილი ავტომატურად დაიხურება, როცა მოვრჩებით
-    valid_times = [t for t in times if t is not None]
-
     with open(filename, "w", newline="") as file:
 
         writer = csv.writer(file)
 
         writer.writerow(["trial", "reaction time (sec)"])
 
-        for trial_num, reaction_time in enumerate(valid_times, start=1):
+        for trial_num, reaction_time in enumerate(times, start=1):
             writer.writerow([trial_num, f"{reaction_time:.4f}"])
 
 
@@ -89,14 +88,13 @@ def main():
 
     # for ლუპი გაუშვებს კოდს შიგნით ერთხელ თითიოეული ერთეულისთვის
     for trial_num in range(1, trials + 1):
-        #
-        result = run_trial(trial_num)
+        result = None
+        while result is None:
+            result = run_trial(trial_num)
+            if result is None:
+                print("This Trial Was Not Counted! Try Again!")
+        reaction_times.append(result)
 
-        if result is not None:
-            reaction_times.append(result)
-        else:
-            print("This Trial Was Not Counted! Try Again!")
-    # შეჯამება
     print("\n *******Summary*******")
 
     if not reaction_times:
@@ -107,13 +105,17 @@ def main():
     for trial_num, reaction_time in enumerate(reaction_times, start=1):
         print(f"Trial {trial_num}: {reaction_time:.4f} seconds")
 
+    # სტატისტიკა
+    print(f"\n Fastest Reaction: {min(reaction_times):.4f} seconds")
+    print(f"Slowest Reaction: {max(reaction_times):.4f} seconds")
+
     # ვთვლით საშუალო არტითმეტიკულს
     avg_time = sum(reaction_times) / len(reaction_times)
-    print(f"\n Average Reaction Time: {avg_time:.4f} წამი")
+    print(f"Average Reaction Time: {avg_time:.4f} seconds")
 
     # შედეგების შენახვა
     save_results(reaction_times)
-    print("Your Results Are Saved To reaction_times.csv file.")
+    print("\n Your Results Are Saved To reaction_times.csv file.")
 
 
 # __________________________________
@@ -122,3 +124,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
